@@ -4,54 +4,63 @@ import TreeView from '@mui/lab/TreeView';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import TreeItem from '@mui/lab/TreeItem';
+import Button from '@mui/material/Button';
 
-interface TreeNode {
-  parent: TreeNode|null;
-  children: TreeNode[];
-  id: string;
-};
-
-//class TreeNode {
-//  parent: TreeNode | null;
-//  children: TreeNode[];
-//  id: string;
-//
-//  constructor(parent: TreeNode|null, children: TreeNode[], id: string) {
-//    this.parent = parent;
-//    this.children = children;
-//    this.id = id;
-//  }
-//};
-
+import { TreeNode, search, listIds } from './tree';
 
 const MainContainer = () => {
 
-  const buildTree = () => {
-    //var tmp = new TreeNode(null, [], "root");
-    //tmp.children.push(new TreeNode(tmp, [], "child1" ));
-    //tmp.children.push(new TreeNode(tmp, [], "child2" ));
+  const [count, setCount] = useState(4);
 
-    const tmp: TreeNode = { parent: null, children: [], id: "root" };
-    const child1: TreeNode = { parent: tmp, children: [], id: "child1"};
-    const child2: TreeNode = { parent: tmp, children: [], id: "child2"};
-    tmp.children.push(child1);
-    tmp.children.push(child2);
-    const grandChild1: TreeNode = { parent: child1, children: [], id: "grandChild1"};
-    child1.children.push(grandChild1);
-    return tmp;
+  const [tree, setTree] = useState<TreeNode>(
+    { id: "0", text: "root", children: [
+        { id: "1", text: "child", children: [{ id: "3", text: "grandchild", children: []}]},
+        { id: "2", text: "child", children: []}
+      ]
+    });
+
+  const [expanded, setExpanded] = useState(["0"]);
+
+  useEffect(()=>{
+    const ids = listIds(tree);
+    setExpanded(ids);
+  }, []);
+
+  const handleToggle = (e: React.SyntheticEvent, nodeIds: string[]) => {
+    console.log("handleToggle", nodeIds);
+    setExpanded(nodeIds);
   };
 
-  const [tree, setTree] = useState(buildTree());
+  const handleAddChild = (nodeId: string) => () => {
+    const node = search(tree, nodeId);
+    const textToChildText = (text: string): string => {
+      if (text.includes("root")) {
+        return "child";
+      } else if (text.includes("child")) {
+        return "grand" + text;
+      } else {
+        return "???";
+      }
+    };
+    if (node != null) {
+    const newId = ""+count;
+    node.children =
+      [...node.children, { id: newId, text: textToChildText(node.text), children: [] }];
+    setTree({...tree});
+    setCount(count + 1);
+    setExpanded([...expanded, newId]);
+    }
+  };
 
   const nodeIdToColorDict: {[key: string]: string} = {
     "root": "lavenderblush",
-    "child": "honeydew",
-    "grandChild": "aliceblue"
+    "grand": "aliceblue",
+    "child": "honeydew", // "child" should be later than "grand"
   };
 
-  const nodeIdToColor = (nodeId: string) => {
+  const nodeToColor = (node: TreeNode) => {
     for (var name of Object.keys(nodeIdToColorDict)) {
-      if (nodeId.includes(name)) {
+      if (node.text.includes(name)) {
         return nodeIdToColorDict[name];
       }
     }
@@ -59,9 +68,9 @@ const MainContainer = () => {
   };
   
   const renderTree = (nodes: TreeNode) => (
-    <TreeItem key={nodes.id} nodeId={nodes.id} label={nodes.id}
-              sx={{background: nodeIdToColor(nodes.id)}}>
-      <div>●</div>
+    <TreeItem key={nodes.id} nodeId={nodes.id} label={nodes.text}
+              sx={{background: nodeToColor(nodes)}}>
+      <Button onClick={handleAddChild(nodes.id)} variant="outlined">Add</Button>
       {Array.isArray(nodes.children)
         ? nodes.children.map((node) => renderTree(node))
         : null}
@@ -74,6 +83,8 @@ const MainContainer = () => {
       defaultCollapseIcon={<ExpandMoreIcon />}
       defaultExpanded={['root']}
       defaultExpandIcon={<ChevronRightIcon />}
+      expanded={expanded}
+      onNodeToggle={handleToggle}
     >
       {renderTree(tree)}
     </TreeView>
@@ -81,3 +92,4 @@ const MainContainer = () => {
 };
 
 export default MainContainer;
+
