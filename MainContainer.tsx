@@ -5,6 +5,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import TreeItem from '@mui/lab/TreeItem';
 import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
 
 import { TreeNode, search, listIds } from './tree';
 
@@ -20,6 +21,9 @@ const MainContainer = () => {
     });
 
   const [expanded, setExpanded] = useState(["0"]);
+
+  //const [propertyTemplate, setPropertyTemplate] = useState({"text": "default"});
+  const propertyTemplate = {"text": "default"};
 
   useEffect(()=>{
     const ids = listIds(tree);
@@ -44,8 +48,11 @@ const MainContainer = () => {
     };
     if (node != null) {
     const newId = ""+count;
-    node.children =
-      [...node.children, { id: newId, text: textToChildText(node.text), children: [] }];
+    node.children = [
+      ...node.children,
+        { id: newId, text: textToChildText(node.text),
+        children: [], properties: propertyTemplate }
+      ];
     setTree({...tree});
     setCount(count + 1);
     setExpanded([...expanded, newId]);
@@ -66,11 +73,32 @@ const MainContainer = () => {
     }
     return nodeIdToColorDict["root"];
   };
+
+  const nodeToLabel = (node: TreeNode) => {
+    const depth = checkDepthForward(node);
+    const nchild = node.children.length;
+    return (nchild == 0 ? "" : `分岐： ${nchild} `)
+         + (depth  == 0 ? "" : `最大深さ: ${depth} `);
+  };
+
+  const checkDepthForward = (node: TreeNode): number => {
+    if (node.children.length <= 0) return 0;
+    return node.children.reduce((acc, curr)=> Math.max(acc, checkDepthForward(curr)), 0) + 1;
+  };
+
+  const handleChange = (node: TreeNode) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (node.properties != null) 
+      node.properties["text"] = e.target.value;
+    setTree({...tree});
+  };
   
   const renderTree = (nodes: TreeNode) => (
-    <TreeItem key={nodes.id} nodeId={nodes.id} label={nodes.text}
-              sx={{background: nodeToColor(nodes)}}>
+    <TreeItem key={nodes.id} nodeId={nodes.id} label={`${nodes.text} ${nodeToLabel(nodes)}`}
+              sx={{background: nodeToColor(nodes), ml: 1.5}}>
       <Button onClick={handleAddChild(nodes.id)} variant="outlined">Add</Button>
+      <TextField label="テキスト"
+                 value={nodes.properties == null ? "" : nodes.properties["text"]}
+                 onChange={handleChange(nodes)}/>
       {Array.isArray(nodes.children)
         ? nodes.children.map((node) => renderTree(node))
         : null}
