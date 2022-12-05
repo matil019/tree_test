@@ -1,0 +1,25 @@
+
+2022/12/03 useMemo considerations
+
+TreeView is always re-rendered and it causes performance problems
+when TreeItem children have many descendants.
+
+At first tried to useMemo, but encountered 2 problems.
+1. renderTree, which is a function to build TreeItem, is a recursive function
+   with conditional statements. In React, we should not use useMemo hook in this function.
+   https://ja.reactjs.org/docs/hooks-rules.html
+   (some work-around or proper way might exist...)
+
+2. renderTree converts TreeNode into React components.
+   TreeNode root is an only state of the parent component,
+   and other nodes (descendants) are not React state.
+   For the rule of immutable state management(?), we take these steps:
+     -shallow copy the root
+     -shallow copy the child to edit
+     -replace (assign) the child
+     -replace (assign) the root
+   which means, in the persect of the react state management system,
+   the whole tree is replaced and obviously should be re-rendered.
+
+problem 2. is clearer for me. memorization should work for this case.
+with the perspective of problem 1, 
