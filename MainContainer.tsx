@@ -9,9 +9,14 @@ import TextField from '@mui/material/TextField';
 import Stack from '@mui/material/Stack';
 import Box from '@mui/material/Box';
 
+import Backdrop from '@mui/material/Backdrop';
+import CircularProgress from '@mui/material/CircularProgress';
+
 import { v4 as uuid } from 'uuid';
 
 import { TreeNode, search, listIds, searchParent } from './tree';
+
+import Evaluation from './Evaluation';
 
 const MainContainer = () => {
 
@@ -21,6 +26,8 @@ const MainContainer = () => {
     });
 
   const [expanded, setExpanded] = useState(["0"]);
+
+  const [isBusy, setIsBusy] = useState(false);
 
   //const [propertyTemplate, setPropertyTemplate] = useState({"text": "default"});
   const propertyTemplate = {
@@ -94,7 +101,7 @@ const MainContainer = () => {
     (e: React.ChangeEvent<HTMLInputElement>) => {
     if (node.properties != null) {
       node.properties[key] = e.target.value;
-      setTree({...tree});
+      //setTree({...tree});
     }
   };
 
@@ -131,7 +138,7 @@ const MainContainer = () => {
           {nodes.properties != null
             ? Object.entries(nodes.properties!).map(([key, value])=>
                 <TextField label={key} key={"textfield-treeitem-properties-"+key} sx={{p: 1}}
-                           value={value} onChange={handleChange(nodes, key)}
+                           defaultValue={value} onChange={handleChange(nodes, key)}
                            size="small"/>
               )
             : null}
@@ -147,18 +154,8 @@ const MainContainer = () => {
         </Stack>
         {Array.isArray(nodes.evaluations)
           ? nodes.evaluations.map((evaluation, index)=>
-              <Stack key={"evaluations-stack-"+nodes.id+"-"+index} direction="column" justifyContent="flex-start">
-                {Object.entries(evaluation).map(([key, value]) =>
-                  <TextField label={key} key={"textfield-treeitem-evaluations-"+key} sx={{p: 1}}
-                             value={value} onChange={handleChange(nodes, key)}
-                             size="small"/>
-                )}
-                <Button variant="outlined" onClick={deleteEvaluation(nodes, index)}
-                        size="small" color="error">
-                  評価の削除
-                </Button>
-              </Stack>
-            )
+              <Evaluation index={index} node={nodes} handleChange={handleChange}
+                          deleteEvaluation={deleteEvaluation} evaluation={evaluation}/>)
           : null
         }
         <Button sx={{height: 40}} size="small" variant="outlined" onClick={addEvaluation(nodes)}>
@@ -170,9 +167,15 @@ const MainContainer = () => {
         : null}
     </TreeItem>
     );
-  }
+  };
+
+  const handleUpdate = async () => {
+    setTree({...tree});
+    console.log("current tree: ", tree);
+  };
 
   return (
+    <>
     <TreeView
       aria-label="test-treeview"
       defaultCollapseIcon={<ExpandMoreIcon />}
@@ -183,6 +186,8 @@ const MainContainer = () => {
       <Button variant="outlined">書き込み</Button>
       {renderTree(tree)}
     </TreeView>
+    <Button variant="outlined" onClick={handleUpdate}>同期</Button>
+    </>
   );
 };
 
