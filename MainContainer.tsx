@@ -16,7 +16,7 @@ import { TreeNode, search, listIds, searchParent } from './tree';
 const MainContainer = () => {
 
   const [tree, setTree] = useState<TreeNode>({
-    id: uuid(), text: "root", children: [],
+    id: uuid(), depth: 0, children: [],
     properties: {"test": "property"}, evaluations: [{"test": "evaluation"}]
     });
 
@@ -29,7 +29,7 @@ const MainContainer = () => {
     "complex": "patterns"
   };
   
-  const nodeToLabel = (node: TreeNode) => {
+  const nodeToDescendantInfo = (node: TreeNode) => {
     const depth = checkDepthForward(node);
     const nchild = node.children.length;
     return (nchild == 0 ? "" : `分岐： ${nchild} `)
@@ -53,20 +53,11 @@ const MainContainer = () => {
   };
 
   const handleAddChild = (node: TreeNode) => () => {
-    const textToChildText = (text: string): string => {
-      if (text.includes("root")) {
-        return "child";
-      } else if (text.includes("child")) {
-        return "grand" + text;
-      } else {
-        return "???";
-      }
-    };
     if (node != null) {
       const newId = uuid();
       node.children = [
         ...node.children,
-        { id: newId, text: textToChildText(node.text),
+        { id: newId, depth: node.depth + 1,
           children: [], properties: propertyTemplate, evaluations: []
         },
       ];
@@ -75,21 +66,23 @@ const MainContainer = () => {
     }
   };
 
-  const nodeIdToColorDict: {[key: string]: string} = {
-    "root": "lavenderblush",
-    "grand": "aliceblue",
-    "child": "honeydew", // "child" should be later than "grand"
-  };
+  const depthToColor = (depth: number): string => {
+    if (depth === 0)
+      return "lavenderblush";
+    else if (depth === 1)
+      return "honeydew";
+    else
+      return "aliceblue";
+  }
 
-  const nodeToColor = (node: TreeNode) => {
-    for (var name of Object.keys(nodeIdToColorDict)) {
-      if (node.text.includes(name)) {
-        return nodeIdToColorDict[name];
-      }
-    }
-    return nodeIdToColorDict["root"];
-  };
+  const nodeToColor = (node: TreeNode) => depthToColor(node.depth);
 
+  const nodeToDepthName = (node: TreeNode): string => {
+    if (node.depth === 0)
+      return "root";
+    else
+      return "grand".repeat(node.depth - 1) + "child";
+  };
 
   const handleChange = (node: TreeNode, key: string) =>
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -125,7 +118,7 @@ const MainContainer = () => {
   const renderTree = (nodes: TreeNode) => {
     console.log(`renderTree(${nodes.id}) called.`);
     return (
-      <TreeItem nodeId={nodes.id} label={`${nodes.text} ${nodeToLabel(nodes)}`}
+      <TreeItem nodeId={nodes.id} label={`${nodeToDepthName(nodes)} ${nodeToDescendantInfo(nodes)}`}
                 sx={{background: nodeToColor(nodes), ml: 1.5}}>
         <Stack direction="row" spacing={2}>
           <Stack direction="column">
