@@ -53,17 +53,15 @@ const MainContainer = () => {
   };
 
   const handleAddChild = (node: TreeNode) => () => {
-    if (node != null) {
-      const newId = uuid();
-      node.children = [
-        ...node.children,
-        { id: newId, depth: node.depth + 1,
-          children: [], properties: propertyTemplate, evaluations: []
-        },
-      ];
-      setTree({...tree});
-      setExpanded([...expanded, newId]);
-    }
+    const newId = uuid();
+    node.children = [
+      ...node.children,
+      { id: newId, depth: node.depth + 1,
+        children: [], properties: propertyTemplate, evaluations: []
+      },
+    ];
+    setTree({...tree});
+    setExpanded([...expanded, newId]);
   };
 
   const depthToColor = (depth: number): string => {
