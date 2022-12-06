@@ -52,15 +52,25 @@ const MainContainer = () => {
     setExpanded(nodeIds);
   };
 
-  const handleAddChild = (node: TreeNode) => () => {
+  const handleAddChild = (parent: TreeNode) => () => {
     const newId = uuid();
-    node.children = [
-      ...node.children,
-      { id: newId, depth: node.depth + 1,
-        children: [], properties: propertyTemplate, evaluations: []
-      },
-    ];
-    setTree({...tree});
+    const newChild = {
+      id: newId,
+      depth: parent.depth + 1,
+      children: [],
+      properties: propertyTemplate,
+      evaluations: [],
+    };
+    const go = (node: TreeNode): TreeNode | null => {
+      if (node.id === parent.id) {
+        return {...node, children: [...node.children, newChild]};
+      } else if (node.children) {
+        return {...node, children: node.children.map(child => go(child) || child)};
+      } else {
+        return null;
+      }
+    };
+    setTree(go(tree) || tree);
     setExpanded([...expanded, newId]);
   };
 
