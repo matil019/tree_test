@@ -63,14 +63,15 @@ const MainContainer = () => {
       }
     };
     if (node != null) {
-    const newId = uuid();
-    node.children = [
-      ...node.children,
+      const newId = uuid();
+      node.children = [
+        ...node.children,
         { id: newId, text: textToChildText(node.text),
-        children: [], properties: propertyTemplate, evaluations: [] }
+          children: [], properties: propertyTemplate, evaluations: []
+        },
       ];
-    setTree({...tree});
-    setExpanded([...expanded, newId]);
+      setTree({...tree});
+      setExpanded([...expanded, newId]);
     }
   };
 
