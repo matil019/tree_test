@@ -17,15 +17,8 @@ export const search = (_node: TreeNode, _id: string): TreeNode | null => {
   return null;
 };
 
-export const searchParent = (_node: TreeNode, _id: string): TreeNode | null => {
-  if (_node.children != null) {
-    for (const child of _node.children) {
-      if (child.id == _id) return _node;
-    }
-    return null;
-  } else {
-    return null;
-  }
+export const hasChild = (_node: TreeNode, _id: string): boolean => {
+  return _node.children.some(child => child.id === _id);
 };
 
 export const searchByNode = (node: TreeNode, target: TreeNode): TreeNode | null => {

@@ -11,7 +11,7 @@ import Box from '@mui/material/Box';
 
 import { v4 as uuid } from 'uuid';
 
-import { TreeNode, search, listIds, searchParent } from './tree';
+import { TreeNode, search, listIds, hasChild } from './tree';
 
 const checkDepthForward = (node: TreeNode): number => {
   if (node.children.length <= 0) return 0;
@@ -81,10 +81,9 @@ const TreeNodeComponent = (props: TreeNodeComponentProps) => {
   };
 
   const deleteNode = (nodeId: string) => () => {
-    const parent = searchParent(tree, nodeId);
-    if (parent != null) {
+    if (hasChild(tree, nodeId)) {
       // TODO avoid mutation
-      parent.children = parent.children.filter((node) => node.id != nodeId);
+      tree.children = tree.children.filter((node) => node.id != nodeId);
       setTree({...tree});
     }
   };
