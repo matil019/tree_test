@@ -124,51 +124,51 @@ const MainContainer = () => {
   const renderTree = (nodes: TreeNode) => {
     console.log(`renderTree(${nodes.id}) called.`);
     return (
-    <TreeItem key={nodes.id} nodeId={nodes.id} label={`${nodes.text} ${nodeToLabel(nodes)}`}
-              sx={{background: nodeToColor(nodes), ml: 1.5}}>
-      <Stack direction="row" spacing={2}>
-        <Stack direction="column">
-          {nodes.properties != null
-            ? Object.entries(nodes.properties!).map(([key, value])=>
-                <TextField label={key} key={"textfield-treeitem-properties-"+key} sx={{p: 1}}
-                           value={value} onChange={handleChange(nodes, key)}
-                           size="small"/>
-              )
-            : null}
-          <Stack direction="row" justifyContent="stretch">
-            <Button size="small" onClick={handleAddChild(nodes)} variant="outlined" fullWidth>
-              次工程の追加
-            </Button>
-            {nodes !== tree
-              ? <Button onClick={deleteNode(nodes.id)} variant="outlined" color="error">削除</Button>
-              : null
-            }
-          </Stack>
-        </Stack>
-        {Array.isArray(nodes.evaluations)
-          ? nodes.evaluations.map((evaluation, index)=>
-              <Stack key={"evaluations-stack-"+nodes.id+"-"+index} direction="column" justifyContent="flex-start">
-                {Object.entries(evaluation).map(([key, value]) =>
-                  <TextField label={key} key={"textfield-treeitem-evaluations-"+key} sx={{p: 1}}
+      <TreeItem key={nodes.id} nodeId={nodes.id} label={`${nodes.text} ${nodeToLabel(nodes)}`}
+                sx={{background: nodeToColor(nodes), ml: 1.5}}>
+        <Stack direction="row" spacing={2}>
+          <Stack direction="column">
+            {nodes.properties != null
+              ? Object.entries(nodes.properties!).map(([key, value])=>
+                  <TextField label={key} key={"textfield-treeitem-properties-"+key} sx={{p: 1}}
                              value={value} onChange={handleChange(nodes, key)}
                              size="small"/>
-                )}
-                <Button variant="outlined" onClick={deleteEvaluation(nodes, index)}
-                        size="small" color="error">
-                  評価の削除
-                </Button>
-              </Stack>
-            )
-          : null
-        }
-        <Button sx={{height: 40}} size="small" variant="outlined" onClick={addEvaluation(nodes)}>
-          評価の追加
-        </Button>
-      </Stack>
-      {Array.isArray(nodes.children)
-        ? nodes.children.map((node) => renderTree(node))
-        : null}
-    </TreeItem>
+                )
+              : null}
+            <Stack direction="row" justifyContent="stretch">
+              <Button size="small" onClick={handleAddChild(nodes)} variant="outlined" fullWidth>
+                次工程の追加
+              </Button>
+              {nodes !== tree
+                ? <Button onClick={deleteNode(nodes.id)} variant="outlined" color="error">削除</Button>
+                : null
+              }
+            </Stack>
+          </Stack>
+          {Array.isArray(nodes.evaluations)
+            ? nodes.evaluations.map((evaluation, index)=>
+                <Stack key={"evaluations-stack-"+nodes.id+"-"+index} direction="column" justifyContent="flex-start">
+                  {Object.entries(evaluation).map(([key, value]) =>
+                    <TextField label={key} key={"textfield-treeitem-evaluations-"+key} sx={{p: 1}}
+                               value={value} onChange={handleChange(nodes, key)}
+                               size="small"/>
+                  )}
+                  <Button variant="outlined" onClick={deleteEvaluation(nodes, index)}
+                          size="small" color="error">
+                    評価の削除
+                  </Button>
+                </Stack>
+              )
+            : null
+          }
+          <Button sx={{height: 40}} size="small" variant="outlined" onClick={addEvaluation(nodes)}>
+            評価の追加
+          </Button>
+        </Stack>
+        {Array.isArray(nodes.children)
+          ? nodes.children.map((node) => renderTree(node))
+          : null}
+      </TreeItem>
     );
   }
 
