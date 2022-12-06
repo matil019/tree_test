@@ -54,38 +54,28 @@ const nodeToDescendantInfo = (node: TreeNode) => {
        + (depth  == 0 ? "" : `最大深さ: ${depth} `);
 };
 
-// TODO name?
 type TreeNodeComponentProps = {
-  isRoot: boolean,
   tree: TreeNode,
   setTree: (nodes: TreeNode) => void,
+  removeTree: (() => void) | null,
   expanded: string[],
   setExpanded: (expanded: string[]) => void,
 }
 
 const TreeNodeComponent = (props: TreeNodeComponentProps) => {
-  const {isRoot, tree, setTree, expanded, setExpanded} = props;
+  const {tree, setTree, removeTree, expanded, setExpanded} = props;
 
   console.log(`<TreeNodeComponent tree.id=${tree.id}>`);
 
-  const addEvaluation = (node: TreeNode) => () => {
-    // TODO avoid mutation
-    node.evaluations = [...node.evaluations, {...evaluationTemplate}];
-    setTree({...tree});
+  const addEvaluation = () => {
+    setTree({...tree, evaluations: [...tree.evaluations, {...evaluationTemplate}]});
   };
 
-  const deleteEvaluation = (node: TreeNode, index: number) => () => {
-    // TODO avoid mutation
-    node.evaluations = node.evaluations.filter((_, i) => i != index);
-    setTree({...tree});
-  };
-
-  const deleteNode = (nodeId: string) => () => {
-    if (hasChild(tree, nodeId)) {
-      // TODO avoid mutation
-      tree.children = tree.children.filter((node) => node.id != nodeId);
-      setTree({...tree});
-    }
+  const deleteEvaluation = (index: number) => () => {
+    setTree({
+      ...tree,
+      evaluations: tree.evaluations.slice(0, index).concat(tree.evaluations.slice(index + 1)),
+    });
   };
 
   const handleAddChild = (parent: TreeNode) => () => {
@@ -110,12 +100,12 @@ const TreeNodeComponent = (props: TreeNodeComponentProps) => {
     setExpanded([...expanded, newId]);
   };
 
-  const handleChange = (node: TreeNode, key: string) =>
+  const handleChange = (key: string) =>
     (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (node.properties != null) {
-      // TODO avoid mutation
-      node.properties[key] = e.target.value;
-      setTree({...tree});
+    if (tree.properties != null) {
+      const newProperties = {...tree.properties};
+      newProperties[key] = e.target.value;
+      setTree({...tree, properties: newProperties});
     }
   };
 
@@ -127,7 +117,7 @@ const TreeNodeComponent = (props: TreeNodeComponentProps) => {
           {tree.properties != null &&
             Object.entries(tree.properties).map(([key, value]) =>
                 <TextField label={key} key={"textfield-treeitem-properties-"+key} sx={{p: 1}}
-                           value={value} onChange={handleChange(tree, key)}
+                           value={value} onChange={handleChange(key)}
                            size="small"/>
               )
           }
@@ -135,8 +125,8 @@ const TreeNodeComponent = (props: TreeNodeComponentProps) => {
             <Button size="small" onClick={handleAddChild(tree)} variant="outlined" fullWidth>
               次工程の追加
             </Button>
-            {isRoot &&
-              <Button onClick={deleteNode(tree.id)} variant="outlined" color="error">削除</Button>
+            {removeTree &&
+              <Button onClick={() => removeTree()} variant="outlined" color="error">削除</Button>
             }
           </Stack>
         </Stack>
@@ -144,27 +134,30 @@ const TreeNodeComponent = (props: TreeNodeComponentProps) => {
           <Stack key={"evaluations-stack-"+tree.id+"-"+index} direction="column" justifyContent="flex-start">
             {Object.entries(evaluation).map(([key, value]) =>
               <TextField label={key} key={"textfield-treeitem-evaluations-"+key} sx={{p: 1}}
-                         value={value} onChange={handleChange(tree, key)}
+                         value={value} onChange={handleChange(key)}
                          size="small"/>
             )}
-            <Button variant="outlined" onClick={deleteEvaluation(tree, index)}
+            <Button variant="outlined" onClick={deleteEvaluation(index)}
                     size="small" color="error">
               評価の削除
             </Button>
           </Stack>
         )}
-        <Button sx={{height: 40}} size="small" variant="outlined" onClick={addEvaluation(tree)}>
+        <Button sx={{height: 40}} size="small" variant="outlined" onClick={addEvaluation}>
           評価の追加
         </Button>
       </Stack>
       {tree.children.map((node, idx) => (
         <TreeNodeComponent
           key={node.id}
-          isRoot={false}
           tree={node}
           setTree={ (newSubtree) => {
             const newChildren = [...tree.children];
             newChildren[idx] = newSubtree;
+            setTree({...tree, children: newChildren});
+          } }
+          removeTree={ () => {
+            const newChildren = tree.children.slice(0, idx).concat(tree.children.slice(idx + 1));
             setTree({...tree, children: newChildren});
           } }
           expanded={expanded}
@@ -204,9 +197,9 @@ const MainContainer = () => {
     >
       <Button variant="outlined">書き込み</Button>
       <TreeNodeComponent
-        isRoot={true}
         tree={tree}
         setTree={setTree}
+        removeTree={null}
         expanded={expanded}
         setExpanded={setExpanded}
         />
