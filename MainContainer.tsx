@@ -165,7 +165,7 @@ const TreeNodeComponent = (props: TreeNodeComponentProps) => {
           />
       ))}
     </TreeItem>
-  ), [expanded, tree]);
+  ), [props]);
 };
 
 const MainContainer = () => {
