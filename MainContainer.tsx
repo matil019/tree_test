@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 
 import TreeView from '@mui/lab/TreeView';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -109,7 +109,7 @@ const TreeNodeComponent = (props: TreeNodeComponentProps) => {
     }
   };
 
-  return (
+  return useMemo(() => (
     <TreeItem nodeId={tree.id} label={`${nodeToDepthName(tree)} ${nodeToDescendantInfo(tree)}`}
               sx={{background: nodeToColor(tree), ml: 1.5}}>
       <Stack direction="row" spacing={2}>
@@ -165,7 +165,7 @@ const TreeNodeComponent = (props: TreeNodeComponentProps) => {
           />
       ))}
     </TreeItem>
-  );
+  ), [expanded, tree]);
 };
 
 const MainContainer = () => {
