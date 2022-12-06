@@ -124,7 +124,7 @@ const MainContainer = () => {
   const renderTree = (nodes: TreeNode) => {
     console.log(`renderTree(${nodes.id}) called.`);
     return (
-      <TreeItem key={nodes.id} nodeId={nodes.id} label={`${nodes.text} ${nodeToLabel(nodes)}`}
+      <TreeItem nodeId={nodes.id} label={`${nodes.text} ${nodeToLabel(nodes)}`}
                 sx={{background: nodeToColor(nodes), ml: 1.5}}>
         <Stack direction="row" spacing={2}>
           <Stack direction="column">
@@ -161,7 +161,7 @@ const MainContainer = () => {
             評価の追加
           </Button>
         </Stack>
-        {nodes.children.map((node) => renderTree(node))}
+        {nodes.children.map((node) => <div key={node.id}>{renderTree(node)}</div>)}
       </TreeItem>
     );
   }
