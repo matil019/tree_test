@@ -78,25 +78,16 @@ const TreeNodeComponent = (props: TreeNodeComponentProps) => {
     });
   };
 
-  const handleAddChild = (parent: TreeNode) => () => {
+  const handleAddChild = () => {
     const newId = uuid();
     const newChild = {
       id: newId,
-      depth: parent.depth + 1,
+      depth: tree.depth + 1,
       children: [],
       properties: propertyTemplate,
       evaluations: [],
     };
-    const go = (node: TreeNode): TreeNode | null => {
-      if (node.id === parent.id) {
-        return {...node, children: [...node.children, newChild]};
-      } else if (node.children) {
-        return {...node, children: node.children.map(child => go(child) || child)};
-      } else {
-        return null;
-      }
-    };
-    setTree(go(tree) || tree);
+    setTree({...tree, children: [...tree.children, newChild]});
     setExpanded([...expanded, newId]);
   };
 
@@ -118,7 +109,7 @@ const TreeNodeComponent = (props: TreeNodeComponentProps) => {
                         size="small"/>
           )}
           <Stack direction="row" justifyContent="stretch">
-            <Button size="small" onClick={handleAddChild(tree)} variant="outlined" fullWidth>
+            <Button size="small" onClick={handleAddChild} variant="outlined" fullWidth>
               次工程の追加
             </Button>
             {removeTree &&
