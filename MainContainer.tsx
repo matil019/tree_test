@@ -102,11 +102,9 @@ const TreeNodeComponent = (props: TreeNodeComponentProps) => {
 
   const handleChange = (key: string) =>
     (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (tree.properties != null) {
-      const newProperties = {...tree.properties};
-      newProperties[key] = e.target.value;
-      setTree({...tree, properties: newProperties});
-    }
+    const newProperties = {...tree.properties};
+    newProperties[key] = e.target.value;
+    setTree({...tree, properties: newProperties});
   };
 
   return useMemo(() => (
@@ -114,13 +112,11 @@ const TreeNodeComponent = (props: TreeNodeComponentProps) => {
               sx={{background: nodeToColor(tree), ml: 1.5}}>
       <Stack direction="row" spacing={2}>
         <Stack direction="column">
-          {tree.properties != null &&
-            Object.entries(tree.properties).map(([key, value]) =>
-                <TextField label={key} key={"textfield-treeitem-properties-"+key} sx={{p: 1}}
-                           value={value} onChange={handleChange(key)}
-                           size="small"/>
-              )
-          }
+          {Object.entries(tree.properties).map(([key, value]) =>
+             <TextField label={key} key={"textfield-treeitem-properties-"+key} sx={{p: 1}}
+                        value={value} onChange={handleChange(key)}
+                        size="small"/>
+          )}
           <Stack direction="row" justifyContent="stretch">
             <Button size="small" onClick={handleAddChild(tree)} variant="outlined" fullWidth>
               次工程の追加

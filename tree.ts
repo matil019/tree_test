@@ -3,7 +3,7 @@ export interface TreeNode {
   children: TreeNode[];
   id: string;
   depth: number;
-  properties?: {[key: string]: string};
+  properties: {[key: string]: string};
   evaluations: {[key: string]: string}[];
 };
 
